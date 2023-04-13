@@ -1,0 +1,19 @@
+{
+  "name": "slot-machine",
+  "version": "1.0.0",
+  "main": "slot machine.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "msql": "^1.0.3",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.2.0",
+    "prompt-sync": "^4.2.0",
+    "uuid": "^9.0.0"
+  },
+  "keywords": [],
+  "description": ""
+}
