@@ -60,8 +60,6 @@ const deposit = () => {
           (error, results) => {
             if (error) {
               console.log("Error depositing money: ", error);
-            } else {
-              console.log("Money deposited successfully!");
             }
           }
         );
