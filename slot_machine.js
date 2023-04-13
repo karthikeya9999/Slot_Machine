@@ -1,19 +1,31 @@
+//Things that we are going to do in this project is:
+// 1.Deposit the money
+// 2.Determine number of lines to bet on
+// 3. Collect a bet amount
+// 4.Spin the slot machine
+// 5. Check if the user has won or not
+// 6. Give the user their winnings
+// 7.Play again
+
+// Importing the prompt-sync module to read input from user
 const prompt= require("prompt-sync")();
 
+//creating a connection with mysql database
 const mysql = require("mysql2");
 const connection = mysql.createConnection({
     
-        connectTimeout: 500000, // in milliseconds
-    host: "localhost",
-    user: "root",
-    password: "123456",
-    database: "slot_machine",
+    connectTimeout: 500000, // in milliseconds
+    host: "localhost", //mysql hostname
+    user: "root",  //username
+    password: "123456", //password
+    database: "slot_machine", //mysql database name
 });
 
-
+//no of rows and columnns in the slot machine
 const ROWS = 3;
 const COLS = 3;
 
+//no of symbols to be present in the machine and also the type of symbols
 const SYMBOLS_COUNT = {
     "A":2,
     "B":4,
@@ -22,6 +34,7 @@ const SYMBOLS_COUNT = {
    
 };
 
+//cost of each symbol
 const SYMBOL_VALUE = {
     "A":2,
     "B":2,
@@ -29,15 +42,19 @@ const SYMBOL_VALUE = {
     "D":2,
 };
 
+//deposit function to allow the user to deposit the money and play the game
 const deposit = () => {
     while (true) {
       const depositAmt = prompt("Enter the deposit amount: ");
       const numberDepositAmt = parseFloat(depositAmt);
         
+        //checking if the user has entered valid amt or not...
       if (isNaN(numberDepositAmt) || numberDepositAmt <= 0) {
         console.log("Invalid Deposit Amount, Try Again..");
       } else {
+          //generating a random id for the user 
         const id = Math.floor(Math.random() * 1000);
+          //inserting the id and deposit amt into the database table
         connection.query(
           `INSERT INTO slot_machine (id, deposit) VALUES (${id}, ${numberDepositAmt})`,
           (error, results) => {
@@ -53,11 +70,14 @@ const deposit = () => {
     }
   };
 
+
+//allowing the user to ask on how many lines should the user bet on
 const getNumberOfLines = () =>{
     while(true){
         const lines = prompt("Enter the no of lines to bet on(1-3): ");
         const numberOfLines = parseFloat(lines);
-
+        
+            //restricting the user to only 1-3 lines
         if(isNaN(numberOfLines) || numberOfLines <= 0 || numberOfLines > 3){
             console.log("Invalid no of lines,Try Again..");
         }
@@ -67,11 +87,14 @@ const getNumberOfLines = () =>{
     }
 };
 
+
+//allowing the user to ask the amount to be bet per each line
 const getBet = (balance,lines) =>{
     while(true){
         const bet = prompt("Enter the bet per line: ");
         const numberBet = parseFloat(bet);
 
+        //checking the bet amt is vakid or not
         if(isNaN(numberBet) || numberBet <= 0 || numberBet > balance / lines){
             console.log("Invalid Bet,Try Again..");
         }
@@ -81,14 +104,17 @@ const getBet = (balance,lines) =>{
     }
 };
 
-const spin = () =>{
-    const symbols = [];
-    for(const[symbol,count] of Object.entries(SYMBOLS_COUNT)) {
-        for( let i=0;i< count; i++){
-            symbols.push(symbol);
-        }
-    }
+
+// The function returns an array of three reels
+const spin = () => {
+const symbols = [];
+for (const [symbol, count] of Object.entries(SYMBOLS_COUNT)) {
+for (let i = 0; i < count; i++) {
+symbols.push(symbol);
+}
+}
    
+// It then creates an array of three reels where each reel contains ROWS number of symbols
     const reels =[[],[],[]];
     for(let i=0;i<COLS;i++){
         const reelSymbols = [...symbols];
@@ -103,9 +129,11 @@ const spin = () =>{
     return reels;
 };
 
+// This function transposes the reels array to rows array
 const transpose = (reels) =>{
     const rows = [];
-   
+    
+   // Each row contains symbols from all three reels for a specific index
     for(let i=0;i<ROWS;i++){
         rows.push([]);
         for(let j=0;j<COLS;j++){
@@ -130,6 +158,8 @@ const printRows = (rows) =>{
     }
 };
 
+// This function checks each row to determine if all the symbols are the same
+// If all the symbols are the same, it calculates the winnings based on the bet and SYMBOL_VALUE
 const getWinnings = (rows, bet, lines)=> {
     let winnings = 0;
     for (let row=0;row<lines;row++){
@@ -150,6 +180,7 @@ const getWinnings = (rows, bet, lines)=> {
     return winnings;
 };
 
+// This is the main function that controls the game flow
 
 const game = () => {
     let { id, balance } = deposit();
@@ -184,9 +215,12 @@ const game = () => {
             }
           }
         );
+          // If the user chooses not to play again, the balance is updated in the database and the game ends.
         console.log("You have finally won the amount of $" + balance);
         break;
       }
     }
   };  
+
+//calling the call function for the working of the slot machine
   game();
